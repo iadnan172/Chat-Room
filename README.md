@@ -17,12 +17,18 @@ Chat-App is a real-time chat application that enables users to communicate seaml
 ```
 Chat-App/
 ├── public/
-│   ├── index.html  # Frontend HTML file
-│   ├── styles.css  # Styling for the application
-│   └── script.js   # Client-side JavaScript logic
-├── server.js       # Node.js server implementation
-├── package.json    # Project dependencies
-└── README.md       # Project documentation (this file)
+│   ├── index.html          # Landing page or main entry point
+│   ├── chat.html           # Chat interface page
+│   ├── chat.css            # Styling for the chat interface
+│   ├── create-group.html   # Create group functionality page
+│   ├── login.html          # Login page
+│   ├── login.css           # Styling for the login page
+│   ├── script.js           # Shared client-side JavaScript logic
+│   └── styles.css          # General styling for the application
+├── server.js               # Node.js server implementation
+├── package.json            # Project dependencies
+└── README.md               # Project documentation
+
 ```
 
 ## Installation
