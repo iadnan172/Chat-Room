@@ -1,0 +1,25 @@
+<!-- create-group.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Create Group</title>
+</head>
+<body>
+    <div class="group-container">
+        <h1>Create Group</h1>
+        <input type="text" id="groupName" placeholder="Group Name" required>
+        <select id="userSelect">
+            <option value="">Select Username</option>
+            <!-- Usernames will be populated here -->
+        </select>
+        <button id="createGroupBtn">Create Group</button>
+        <h2>Existing Groups</h2>
+        <div id="groupList"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
