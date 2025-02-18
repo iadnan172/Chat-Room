@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
 
 :root {
-	--dark-color-a: #667aff;
-	--dark-color-b: #7386ff;
+	--dark-color-a: #12192d;
+	--dark-color-b: #12192d;
 	--light-color: #e6e9ff;
 	--success-color: #5cb85c;
 	--error-color: #d9534f;
@@ -36,8 +36,24 @@ a {
 	color: var(--dark-color-a);
 	border: 0;
 	font-size: 17px;
+
 }
 
+.logIn-btn:hover{
+	border: 2px solid rgb(16, 16, 16);
+}
+
+
+.logIn-btn{
+	max-width: fit-content;
+	margin-inline: auto;
+	align-self: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 1rem;
+	transition: all 0.4s ease-in-out;
+}
 /* Chat Page */
 
 .chat-container {
@@ -90,7 +106,10 @@ a {
 	max-height: 500px;
 	overflow-y: scroll;
 }
-
+.join-container{
+	border-radius: 1rem;
+	box-shadow: 1rem 1rem .3rem 1rem rgb(153, 89, 89);
+}
 .chat-messages .message {
 	padding: 10px;
 	margin-bottom: 15px;
@@ -158,20 +177,31 @@ a {
 .join-main label {
 	display: block;
 	margin-bottom: 5px;
+	text-align: center;
+	padding-bottom: .4rem;
 }
 
-.join-main input[type='text'] {
-	font-size: 16px;
+.join-main input[type='text'] ,#room{
+	font-size: 12px;
 	padding: 5px;
 	height: 40px;
-	width: 100%;
+	width: 90%;
+	border-radius: .7rem;
+	display: flex;
+	justify-self: center;
+	outline: none;
+	transition: all 0.7s ease-in-out;
+}
+
+.join-main input[type='text']:hover ,#room:hover{
+	border: 2px solid black;
 }
 
 .join-main select {
 	font-size: 16px;
 	padding: 5px;
 	height: 40px;
-	width: 100%;
+	width: 90%;
 }
 
 .join-main .btn {

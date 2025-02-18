@@ -10,25 +10,35 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="css/style.css" />
-    <title>ChatCord App</title>
+    <title>Chat-App</title>
   </head>
   <body>
     <div class="chat-container">
       <header class="chat-header">
-        <h1><i class="fas fa-smile"></i> ChatCord</h1>
+        <h1><i class="fas fa-smile"></i>Chat-App</h1>
         <a id="leave-btn" class="btn">Leave Room</a>
       </header>
       <main class="chat-main">
         <div class="chat-sidebar">
-          <h3><i class="fas fa-comments"></i> Room Name:</h3>
+          <h3><i class="fas fa-comments"></i>Room Name:</h3>
           <h2 id="room-name"></h2>
-          <h3><i class="fas fa-users"></i> Users</h3>
+          <h3><i class="fas fa-users"></i>Users</h3>
           <ul id="users"></ul>
+          <a id="profile-btn" class="btn">profile</a>
+
         </div>
         <div class="chat-messages"></div>
       </main>
       <div class="chat-form-container">
         <form id="chat-form">
+          <input
+            id="receiver"
+            type="text"
+            name="receiver"
+            placeholder="Enter receiver's username"
+            required
+            autocomplete="off"
+          />
           <input
             id="msg"
             type="text"
@@ -36,7 +46,7 @@
             required
             autocomplete="off"
           />
-          <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
+           <button class="btn"><i class="fas fa-paper-plane"></i>Send</button>
         </form>
       </div>
     </div>
