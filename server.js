@@ -5,7 +5,7 @@ const socketio = require("socket.io");
 const formatMessage = require("./utils/messages");
 const createAdapter = require("@socket.io/redis-adapter").createAdapter;
 const redis = require("redis");
-const mysql = require("mysql2"); // MySQL module
+const mysql = require("mysql2");
 require("dotenv").config();
 const { createClient } = redis;
 const {
@@ -19,25 +19,21 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-// Set static folder
 app.use(express.static(path.join(__dirname, "public")));
 
 const botName = "Chat";
 
-// MySQL Database Connection
+// MySQL Connection
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root", 
-  password: "root", 
+  user: "root",
+  password: "root",
   database: "chat_app",
 });
 
 db.connect((err) => {
-  if (err) {
-    console.error("MySQL connection error:", err);
-  } else {
-    console.log("Connected to MySQL Database");
-  }
+  if (err) console.error("MySQL error:", err);
+  else console.log("Connected to MySQL");
 });
 
 (async () => {
@@ -47,86 +43,119 @@ db.connect((err) => {
   io.adapter(createAdapter(pubClient, subClient));
 })();
 
-// Run when client connects
+// Socket.IO Connection Handler
 io.on("connection", (socket) => {
   console.log(io.of("/").adapter);
 
-  socket.on("joinRoom", ({ username, room }) => {
-    const user = userJoin(socket.id, username, room);
+  // Join Room Handler
+  socket.on("joinRoom", ({ username, room, password }) => {
+    const user = userJoin(socket.id, username, room, password);
     socket.join(user.room);
 
-    // Welcome current user
+    // Welcome message
     socket.emit("message", formatMessage(botName, "Welcome to Chat-App!"));
+    
+    // Broadcast user join
+    socket.broadcast.to(user.room).emit(
+      "message", 
+      formatMessage(botName, `${user.username} has joined the chat`)
+    );
 
-    // Broadcast when a user connects
-    socket.broadcast
-      .to(user.room)
-      .emit("message", formatMessage(botName, `${user.username} has joined the chat`));
-
-    // Send users and room info
+    // Send room info
     io.to(user.room).emit("roomUsers", {
       room: user.room,
       users: getRoomUsers(user.room),
     });
 
-    // Fetch previous messages and send them to the user
+    // Fetch previous messages
     db.query(
       "SELECT * FROM messages WHERE room = ? ORDER BY time ASC",
       [user.room],
       (err, results) => {
-        if (err) {
-          console.error("Error fetching messages:", err);
-          return;
-        }
+        if (err) return console.error("Fetch error:", err);
         results.forEach((msg) => {
           socket.emit("message", formatMessage(msg.username, msg.message));
         });
       }
     );
   });
-
-
-
-  // Listen for chatMessage and store it in MySQL
+  
+  // Message Handler
   socket.on("chatMessage", ({ msg, receiver }) => {
     const user = getCurrentUser(socket.id);
-
-    if (!user) {
-      return;
-    }
+    if (!user) return;
 
     const messageData = {
       sender: user.username,
-      receiver: receiver, // Receiver's username
+      receiver: receiver,
       room: user.room,
       message: msg,
+      password: user.password,
     };
+    // Add this in your Socket.IO connection handler after the "chatMessage" handler
+socket.on("groupChatMessage", (data) => {
+  const user = getCurrentUser(socket.id);
+  if (!user) return;
 
-    // Insert message into MySQL
+  const passwordToStore = user.password || "hysererrSgarHH@123TTS";
+
+  // Insert into group_messages table
+  db.query(
+    "INSERT INTO group_messages (username, room, message, password) VALUES (?, ?, ?, ?)",
+    [user.username, user.room, data.msg, passwordToStore],
+    (err, result) => {
+      if (err) {
+        console.error("Group message insert error:", err);
+        return;
+      }
+      console.log("Group message stored:", result.insertId);
+      // Broadcast to the group room
+      io.to(user.room).emit("message", formatMessage(user.username, data.msg));
+    }
+  );
+});
+
+// Modify the joinRoom handler's message fetching part
+socket.on("joinRoom", ({ username, room, password }) => {
+  // ... existing joinRoom code ...
+
+  // Modified message fetching logic
+  const isGroupChat = user.room === 'Group-chat';
+  const query = isGroupChat 
+    ? "SELECT * FROM group_messages WHERE room = ? ORDER BY time ASC"
+    : "SELECT * FROM messages WHERE room = ? ORDER BY time ASC";
+
+  db.query(query, [user.room], (err, results) => {
+    if (err) return console.error("Fetch error:", err);
+    results.forEach((msg) => {
+      socket.emit("message", formatMessage(msg.username, msg.message));
+    });
+  });
+});
+
+     const passwordToStore = messageData.password || "hysererrSgarHH@123TTS";
+
     db.query(
-      "INSERT INTO messages (username, receiver, room, message) VALUES (?, ?, ?, ?)",
-      [messageData.sender,  messageData.receiver, messageData.room, messageData.message],
+      "INSERT INTO messages (sender, receiver, room, message, password) VALUES (?, ?, ?, ?, ?)",
+      [messageData.sender, messageData.receiver, messageData.room, 
+       messageData.message, passwordToStore],
       (err, result) => {
-        if (err) {
-          console.error("Error inserting message:", err);
-          return;
-        }
-        console.log("Message stored in database:", result.insertId);
+        if (err) return console.error("Insert error:", err);
+        console.log("Message stored:", result.insertId);
       }
     );
 
-    // Emit message to the receiver if they are in the same room
     io.to(user.room).emit("message", formatMessage(user.username, msg));
   });
 
-  // Runs when client disconnects
+  // Disconnect Handler
   socket.on("disconnect", () => {
     const user = userLeave(socket.id);
-
     if (user) {
-      io.to(user.room).emit("message", formatMessage(botName, `${user.username} has left the chat`));
-
-      // Send users and room info
+      io.to(user.room).emit(
+        "message", 
+        formatMessage(botName, `${user.username} has left the chat`)
+      );
       io.to(user.room).emit("roomUsers", {
         room: user.room,
         users: getRoomUsers(user.room),
@@ -136,5 +165,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 4000;
-
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

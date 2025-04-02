@@ -1,89 +1,175 @@
+
+// const chatForm = document.getElementById("chat-form");
+// const chatMessages = document.querySelector(".chat-messages");
+// const roomName = document.getElementById("room-name");
+// const userList = document.getElementById("users");
+
+// // Get username, room, and password from URL
+// const { username, room, password } = Qs.parse(location.search, {
+//   ignoreQueryPrefix: true,
+// });
+
+// const socket = io(); // Initialize socket FIRST
+
+// // Join chatroom with password
+// socket.emit("joinRoom", { username, room, password });
+
+// // Get room and users
+// socket.on("roomUsers", ({ room, users }) => {
+//   outputRoomName(room);
+//   outputUsers(users);
+// });
+
+// //-------------------------------------------------
+// // Message from server
+// socket.on("message", (message) => {
+//   console.log(message);
+//   outputMessage(message);
+//   chatMessages.scrollTop = chatMessages.scrollHeight;
+// });
+
+// // Message submit handler
+// chatForm.addEventListener("submit", (e) => {
+//   e.preventDefault();
+//   const msg = e.target.elements.msg.value.trim();
+//   const receiver = e.target.elements.receiver.value.trim();
+
+//   if (msg && receiver) {
+//     socket.emit("chatMessage", { msg, receiver });
+//     e.target.elements.msg.value = "";
+//     e.target.elements.receiver.value = "";
+//     e.target.elements.msg.focus();
+//   }
+// });
+
+// // DOM output functions
+// function outputMessage(message) {
+//   const div = document.createElement("div");
+//   div.classList.add("message");
+//   div.innerHTML = `
+//     <p class="meta">${message.username} <span>${message.time}</span></p>
+//     <p class="text">${message.text}</p>
+//   `;
+//   chatMessages.appendChild(div);
+// }
+
+// function outputRoomName(room) {
+//   roomName.textContent = room;
+// }
+
+// function outputUsers(users) {
+//   userList.innerHTML = users.map(user => 
+//     `<li>${user.username}</li>`
+//   ).join("");
+// }
+
+// // Leave room handler
+// document.getElementById("leave-btn").addEventListener("click", () => {
+//   if (confirm("Are you sure you want to leave the chatroom?")) {
+//     window.location = "../index.html";
+//   }
+// });
+
 const chatForm = document.getElementById("chat-form");
 const chatMessages = document.querySelector(".chat-messages");
 const roomName = document.getElementById("room-name");
 const userList = document.getElementById("users");
 
-// Get username and room from URL
-const { username, room } = Qs.parse(location.search, {
+// Get username, room, and password from URL
+const { username, room, password } = Qs.parse(location.search, {
   ignoreQueryPrefix: true,
 });
 
-const socket = io();
+const socket = io(); // Initialize socket FIRST
 
-// Join chatroom
-socket.emit("joinRoom", { username, room });
+// Join chatroom with password
+socket.emit("joinRoom", { username, room, password });
 
 // Get room and users
 socket.on("roomUsers", ({ room, users }) => {
   outputRoomName(room);
   outputUsers(users);
 });
+//-------------------------------------------------
+// In your client-side main.js
+if (room === "Group-chat") {
+  socket.emit("groupChatMessage", { msg });
+}
 
+//-------------------------------------------------
 // Message from server
 socket.on("message", (message) => {
   console.log(message);
   outputMessage(message);
-
-  // Scroll down
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
-// Message submit with receiver input
- chatForm.addEventListener("submit", (e) => {
+// Message submit handler
+// chatForm.addEventListener("submit", (e) => {
+//   e.preventDefault();
+//   const msg = e.target.elements.msg.value.trim();
+//   const receiver = e.target.elements.receiver.value.trim();
+  
+//   if (msg) {
+//     if (room === "group-chat") {
+//       // Send message to group chat
+//       socket.emit("groupChatMessage", { username, room, msg });
+//     } else if (receiver) {
+//       // Send private message
+//       socket.emit("chatMessage", { msg, receiver });
+//     }
+//     e.target.elements.msg.value = "";
+//     e.target.elements.receiver.value = "";
+//     e.target.elements.msg.focus();
+//   }
+// });
+
+// Modify your message submit handler
+chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  let msg = e.target.elements.msg.value.trim();
-  let receiver = e.target.elements.receiver.value.trim(); // Get receiver's username
-  if (!msg || !receiver) {
-    return false;
+  const msg = e.target.elements.msg.value.trim();
+  const receiver = e.target.elements.receiver.value.trim();
+  
+  if (msg) {
+    if (room === "Group-chat") {
+      // Ensure no receiver for group chats
+      e.target.elements.receiver.value = "";
+      socket.emit("groupChatMessage", { msg });
+    } else if (receiver) {
+      socket.emit("chatMessage", { msg, receiver });
+    } else {
+      alert("Please select a receiver for private chat!");
+    }
+    
+    e.target.elements.msg.value = "";
+    e.target.elements.msg.focus();
   }
-
-  // Emit message with receiver info
-  socket.emit("chatMessage", { msg, receiver });
-
-  // Clear input fields
-  e.target.elements.msg.value = "";
-  e.target.elements.receiver.value = "";
-  e.target.elements.msg.focus();
 });
 
- 
-
-// Output message to DOM
+// DOM output functions
 function outputMessage(message) {
   const div = document.createElement("div");
   div.classList.add("message");
-  const p = document.createElement("p");
-  p.classList.add("meta");
-  p.innerText = message.username;
-  p.innerHTML += `<span>${message.time}</span>`;
-  div.appendChild(p);
-  const para = document.createElement("p");
-  para.classList.add("text");
-  para.innerText = message.text;
-  div.appendChild(para);
-  document.querySelector(".chat-messages").appendChild(div);
+  div.innerHTML = `
+    <p class="meta">${message.username} <span>${message.time}</span></p>
+    <p class="text">${message.text}</p>
+  `;
+  chatMessages.appendChild(div);
 }
 
-
-// Add room name to DOM
 function outputRoomName(room) {
-  roomName.innerText = room;
+  roomName.textContent = room;
 }
 
-// Add users to DOM
 function outputUsers(users) {
-  userList.innerHTML = "";
-  users.forEach((user) => {
-    const li = document.createElement("li");
-    li.innerText = user.username;
-    userList.appendChild(li);
-  });
+  userList.innerHTML = users.map(user => 
+    `<li>${user.username}</li>`
+  ).join("");
 }
 
-// Prompt the user before leaving the chat room
+// Leave room handler
 document.getElementById("leave-btn").addEventListener("click", () => {
-  const leaveRoom = confirm("Are you sure you want to leave the chatroom?");
-  if (leaveRoom) {
+  if (confirm("Are you sure you want to leave the chatroom?")) {
     window.location = "../index.html";
   }
 });
