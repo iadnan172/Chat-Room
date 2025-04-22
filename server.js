@@ -21,6 +21,12 @@ const io = socketio(server);
 
 app.use(express.static(path.join(__dirname, "public")));
 
+//for index.html
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 const botName = "Chat";
 
 // MySQL Connection
