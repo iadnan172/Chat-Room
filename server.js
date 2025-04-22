@@ -92,7 +92,7 @@ io.on("connection", (socket) => {
       message: msg,
       password: user.password,
     };
-    // Add this in your Socket.IO connection handler after the "chatMessage" handler
+    // socket.io connection for group messaging
 socket.on("groupChatMessage", (data) => {
   const user = getCurrentUser(socket.id);
   if (!user) return;
@@ -133,7 +133,7 @@ socket.on("joinRoom", ({ username, room, password }) => {
   });
 });
 
-     const passwordToStore = messageData.password || "hysererrSgarHH@123TTS";
+     const passwordToStore = messageData.password || "$2b$12$lMlHT8TtkC8Jo1LFtjA1LuPv.pP8DnvYJOXSq5TAyEZXs8j7YP1vq";
 
     db.query(
       "INSERT INTO messages (sender, receiver, room, message, password) VALUES (?, ?, ?, ?, ?)",
