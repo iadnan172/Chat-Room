@@ -54,7 +54,7 @@ const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "root",
-  database: "chat_app",
+  database: "chatapp",
 });
 
 db.connect((err) => {
