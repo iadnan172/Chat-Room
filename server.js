@@ -5,7 +5,7 @@ const socketio = require("socket.io");
 const formatMessage = require("./utils/messages");
 const { createAdapter } = require("@socket.io/redis-adapter");
 const { createClient } = require("redis"); // ✅ Yeh line fix hai
-const mysql = require("mysql2");
+// const mysql = require("mysql2");
 const Redis = require('ioredis');
 require("dotenv").config();
 console.log("👉 REDIS_URL loaded from .env or Render:", process.env.REDIS_URL);
@@ -52,9 +52,9 @@ const botName = "Chat";
 
 // MySQL Connection
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root",
+  host: "database1.chiiqk6msqz4.us-east-1.rds.amazonaws.com",
+  user: "admin",
+  password: "AdnanSecure#2025",
   database: "chatapp",
 });
 
