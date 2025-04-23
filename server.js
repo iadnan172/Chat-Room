@@ -6,6 +6,7 @@ const formatMessage = require("./utils/messages");
 const { createAdapter } = require("@socket.io/redis-adapter");
 const { createClient } = require("redis"); // ✅ Yeh line fix hai
 const mysql = require("mysql2");
+const Redis = require('ioredis');
 require("dotenv").config();
 console.log("👉 REDIS_URL loaded from .env or Render:", process.env.REDIS_URL);
 
