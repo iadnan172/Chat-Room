@@ -11,10 +11,10 @@ require("dotenv").config();
 console.log("👉 REDIS_URL loaded from .env or Render:", process.env.REDIS_URL);
 
 // ✅ Redis client
-const client = createClient({
-  url: process.env.REDIS_URL,
-});
-client.connect().catch(console.error);
+// const client = createClient({
+//   url: process.env.REDIS_URL,
+// });
+// client.connect().catch(console.error);
 
 const {
   userJoin,
@@ -68,15 +68,19 @@ db.connect((err) => {
     const pubClient = createClient({ url: process.env.REDIS_URL });
     const subClient = pubClient.duplicate();
 
+    pubClient.on('error', err => console.error("❌ Redis PubClient Error:", err));
+    subClient.on('error', err => console.error("❌ Redis SubClient Error:", err));
+
     await pubClient.connect();
     await subClient.connect();
 
     io.adapter(createAdapter(pubClient, subClient));
     console.log("✅ Redis connected and adapter set.");
   } catch (err) {
-    console.error("❌ Redis connection failed:", err);
+    console.error("❌ Redis connection failed:", err.message);
   }
 })();
+
 
 
 // Socket.IO Connection Handler
