@@ -19,13 +19,25 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-app.use(express.static(path.join(__dirname, "public")));
+ app.use(express.static(path.join(__dirname, "public")));
 
 //for index.html
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+// app.get('/', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'index.html'));
+// });
+
+// app.get('/chat', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'chat.html'));
+// });
+
+// app.get('/index.js', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'index.js'));
+// });
+
+// app.get('/style.css', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'style.css'));
+// });
 
 const botName = "Chat";
 
