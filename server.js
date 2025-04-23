@@ -7,7 +7,11 @@ const createAdapter = require("@socket.io/redis-adapter").createAdapter;
 const redis = require("redis");
 const mysql = require("mysql2");
 require("dotenv").config();
-const { createClient } = redis;
+const redis = require('redis');
+const client = redis.createClient({
+  url: process.env.REDIS_URL,
+});
+client.connect().catch(console.error);
 const {
   userJoin,
   getCurrentUser,
