@@ -7,6 +7,7 @@ const { createAdapter } = require("@socket.io/redis-adapter");
 const { createClient } = require("redis"); // ✅ Yeh line fix hai
 const mysql = require("mysql2");
 require("dotenv").config();
+console.log("👉 REDIS_URL loaded from .env or Render:", process.env.REDIS_URL);
 
 // ✅ Redis client
 const client = createClient({
@@ -62,11 +63,20 @@ db.connect((err) => {
 });
 
 (async () => {
-  pubClient = createClient({ url: "redis://127.0.0.1:6379" });
-  await pubClient.connect();
-  subClient = pubClient.duplicate();
-  io.adapter(createAdapter(pubClient, subClient));
+  try {
+    const pubClient = createClient({ url: process.env.REDIS_URL });
+    const subClient = pubClient.duplicate();
+
+    await pubClient.connect();
+    await subClient.connect();
+
+    io.adapter(createAdapter(pubClient, subClient));
+    console.log("✅ Redis connected and adapter set.");
+  } catch (err) {
+    console.error("❌ Redis connection failed:", err);
+  }
 })();
+
 
 // Socket.IO Connection Handler
 io.on("connection", (socket) => {
