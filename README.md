@@ -1,56 +1,111 @@
-# Chat-Room Application
+# 🚀 Chat-Room Application
 
-This is a real-time chat-room application built using **Socket.IO**, **HTML**, **CSS**, **JavaScript**, and **MySQL**. The application runs on **localhost:4000** and utilizes a **Redis server** for managing WebSocket connections efficiently.
+A real-time chat-room application built using **Socket.IO**, **Node.js**, **MySQL**, **Redis**, and a frontend powered by **HTML**, **CSS**, and **JavaScript**.  
+It supports **multiple chat rooms**, **private chats**, and **real-time communication** with **user authentication**.
 
-## Features
+> **Project Status:** Final Year College Project 🎓 | Future features in progress...
 
-- **Real-time messaging** using Socket.IO.
-- **User authentication** with MySQL database.
-- **Multiple chat rooms** for users to join.
-- **Redis server** integration for efficient message broadcasting.
-- **Private chat support** between users.
-- **User online status tracking**.
+---
 
-## Technologies Used
+## 📸 Screenshots
 
-- **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Node.js, Express.js, Socket.IO
-- **Database**: MySQL
-- **Caching & WebSockets**: Redis server
+### 🛢️ Login Page
+![Login Page](./{932F5931-C298-4ADB-AE76-EAB8AAD28139}.png)
 
-## Installation & Setup
+---
 
-1. **Clone the repository**:
-   ```sh
-   git clone https://github.com/iadnan172/Chat-Room.git
-   cd Chat-Room
-   ```
+### 🔒 Private Chat
+![Private Chat](./private-chat.jpg)
 
-2. **Install dependencies**:
-   ```sh
-   npm install
-   ```
+---
 
-3. **Setup MySQL Database**:
-   - Create a MySQL database and update the connection details in the `.env` file.
+### 👥 Group Chat
+![Group Chat](./group-chat.jpg)
 
-4. **Run Redis Server**:
-   Ensure Redis is installed and running on your system:
-   ```sh
-   redis-server
-   ```
+---
 
-5. **Start the Application**:
-   ```sh
-   npm run dev
-   ```
+## ✨ Features
 
-6. Open your browser and navigate to `http://localhost:4000`.
+- 🔵 Real-time messaging with **Socket.IO**
+- 🚱️ User authentication via **MySQL**
+- 🗣️ Multiple chat rooms support
+- 🔐 Private one-on-one chatting
+- 🚀 Redis integration for efficient broadcasting
+- 🟢 User online/offline status tracking
 
-## Environment Variables
+---
 
-Create a `.env` file in the project root and configure the following:
+## 🛠️ Technologies Used
+
+| Frontend         | Backend          | Database     | Real-Time Server  |
+| ---------------- | ---------------- | ------------ | ----------------- |
+| HTML, CSS, JS    | Node.js, Express  | MySQL        | Socket.IO, Redis   |
+
+---
+
+## 📥 Installation & Setup Guide
+
+### Prerequisites:
+- Node.js
+- MySQL
+- Redis Server
+
+---
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/iadnan172/Chat-Room.git
+cd Chat-Room
 ```
+
+---
+
+### 2. Install Node.js Dependencies
+
+```bash
+npm install
+```
+
+---
+
+### 3. Setup MySQL Database
+- Create a MySQL database (example: `chat_app`).
+- Update database credentials in your `.env` file.
+
+---
+
+### 4. Run Redis Server
+Ensure Redis is installed and start the server:
+
+```bash
+redis-server
+```
+
+---
+
+### 5. Start the Application
+
+```bash
+npm run dev
+```
+
+---
+
+### 6. Access Application
+Open your browser and navigate to:
+
+```
+http://localhost:4000
+```
+
+---
+
+## 🔑 Environment Variables
+
+Create a `.env` file in the project root and add:
+
+```plaintext
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=yourpassword
@@ -59,42 +114,62 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 ```
 
-## Folder Structure
+---
+
+## 📂 Folder Structure
 
 ```
 /chat-room
-│── /public            # Frontend files
-│   ├── /css           # Stylesheets
-│   │   ├── styles.css
-│   ├── /js            # JavaScript files
-│   │   ├── main.js
-│   ├── index.html     # Main chat room page
-│   ├── chat.html      # Chat interface page
-│── /utils             # Utility functions
-│   ├── message.js
-│   ├── users.js
-│── server.js          # Main server file
-│── package.json       # Project dependencies
-│── .env               # Environment variables
-│── README.md          # Project documentation
+│—— /public
+│   ├—— /css
+│   │   ├—— styles.css
+│   ├—— /js
+│   │   ├—— main.js
+│   ├—— index.html
+│   ├—— chat.html
+│—— /utils
+│   ├—— message.js
+│   ├—— users.js
+│—— server.js
+│—— package.json
+│—— .env
+│—— README.md
 ```
-
-## Future Enhancements
-
-- Add **media sharing** (images, files, videos).
-- Implement **user authentication** using JWT.
-- Introduce **message encryption** for privacy.
-- Deploy the application on **AWS/GCP**.
-
-## License
-
-This project is licensed under the **MIT License**.
 
 ---
 
-**Contributions are welcome!** If you find any issues, feel free to raise a pull request or an issue. 😊
+## 🚀 Future Enhancements
 
-This is my college final year project, and in the future, I plan to add multiple features to it.
+- 📷 Media Sharing (Images, Files, Videos)
+- 🔐 JWT Authentication
+- 🔐 End-to-End Message Encryption
+- ☁️ Cloud Deployment (AWS/GCP)
 
-Thanks,
-Adnan Pathan
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License**.  
+Feel free to use, modify, and distribute.
+
+---
+
+## 👌 Contributions
+
+Contributions, issues, and feature requests are welcome!  
+Feel free to open a **Pull Request** or **Issue**.
+
+---
+
+## ✨ About Me
+
+Developed by **Adnan Pathan** — Computer Science Student 👨‍💻  
+> "Building real-world projects to sharpen skills and inspire others."
+
+---
+
+# Thank You! 🙏
+
+---
+
+
