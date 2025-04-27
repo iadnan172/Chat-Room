@@ -249,6 +249,16 @@ a {
 	gap: 1rem;
 }
 
+footer {
+	text-align: center;
+	padding: 20px;
+	background-color: #f1f1f1;
+	position: fixed;
+	width: 100%;
+	bottom: 0;
+	left: 0;
+}
+
 @media (max-width: 700px) {
 	.chat-main {
 		display: block;
