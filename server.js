@@ -1,4 +1,3 @@
-// Description: This code sets up a chat server using Socket.IO, Redis, and MySQL. It handles user connections, message storage, and retrieval from a MySQL database, and uses Redis for pub/sub functionality.
 const path = require("path");
 const http = require("http");
 const express = require("express");
@@ -7,8 +6,8 @@ const formatMessage = require("./utils/messages");
 const { createAdapter } = require("@socket.io/redis-adapter");
 const { createClient } = require("redis");
 const mysql = require("mysql2");
+const { hashPassword, comparePassword, generateToken, verifyToken } = require("./utils/auth");
 require("dotenv").config();
-console.log("👉 REDIS_URL loaded from .env or Render:", process.env.REDIS_URL);
 
 const {
   userJoin,
@@ -21,6 +20,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 const botName = "Chat";
@@ -38,7 +40,7 @@ db.connect((err) => {
   else console.log("Connected to MySQL");
 });
 
-// ✅ Redis Pub/Sub Client Setup (Local)
+// Redis Setup
 const pubClient = createClient({
   url: process.env.REDIS_URL || "redis://localhost:6379",
 });
@@ -48,15 +50,155 @@ pubClient.connect().catch(console.error);
 subClient.connect().catch(console.error);
 
 io.adapter(createAdapter(pubClient, subClient));
-console.log("✅ Redis Pub/Sub adapter set for Socket.IO");
 
+// ==================== AUTHENTICATION ROUTES ====================
 
-// Socket.IO Connection Handler
+// Register Route
+app.post('/api/register', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  // Validation
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+
+  try {
+    // Check if user already exists
+    db.query(
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [username, email],
+      async (err, results) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ error: 'Database error' });
+        }
+
+        if (results.length > 0) {
+          return res.status(400).json({ error: 'Username or email already exists' });
+        }
+
+        // Hash password
+        const hashedPassword = await hashPassword(password);
+
+        // Insert user
+        db.query(
+          'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+          [username, email, hashedPassword],
+          (err, result) => {
+            if (err) {
+              console.error('Insert error:', err);
+              return res.status(500).json({ error: 'Registration failed' });
+            }
+
+            // Generate token
+            const token = generateToken(result.insertId, username);
+
+            res.json({
+              success: true,
+              message: 'Registration successful',
+              token,
+              username
+            });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Login Route
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required' });
+  }
+
+  // Find user
+  db.query(
+    'SELECT * FROM users WHERE username = ?',
+    [username],
+    async (err, results) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      const user = results[0];
+
+      // Compare passwords
+      const isMatch = await comparePassword(password, user.password);
+
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      // Generate token
+      const token = generateToken(user.id, user.username);
+
+      res.json({
+        success: true,
+        message: 'Login successful',
+        token,
+        username: user.username
+      });
+    }
+  );
+});
+
+// Verify Token Route
+app.get('/api/verify', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const decoded = verifyToken(token);
+
+  if (!decoded) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+
+  res.json({ success: true, user: decoded });
+});
+
+// ==================== SOCKET.IO WITH AUTH ====================
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+
+  if (!token) {
+    return next(new Error('Authentication error: No token provided'));
+  }
+
+  const decoded = verifyToken(token);
+
+  if (!decoded) {
+    return next(new Error('Authentication error: Invalid token'));
+  }
+
+  socket.userId = decoded.userId;
+  socket.username = decoded.username;
+  next();
+});
+
 io.on("connection", (socket) => {
-  console.log(io.of("/").adapter);
+  console.log(`User connected: ${socket.username}`);
 
-  socket.on("joinRoom", ({ username, room, password }) => {
-    const user = userJoin(socket.id, username, room, password);
+  socket.on("joinRoom", ({ room }) => {
+    const user = userJoin(socket.id, socket.username, room);
     socket.join(user.room);
 
     socket.emit("message", formatMessage(botName, "Welcome to Chat-App!"));
@@ -85,24 +227,13 @@ io.on("connection", (socket) => {
     });
   });
   
-  // Message Handler
   socket.on("chatMessage", ({ msg, receiver }) => {
     const user = getCurrentUser(socket.id);
     if (!user) return;
 
-    const messageData = {
-      sender: user.username,
-      receiver: receiver,
-      room: user.room,
-      message: msg,
-      password: user.password,
-    };
-
-    const passwordToStore = messageData.password || "$2b$12$lMlHT8TtkC8Jo1LFtjA1LuPv.pP8DnvYJOXSq5TAyEZXs8j7YP1vq";
-
     db.query(
-      "INSERT INTO messages (sender, receiver, room, message, password) VALUES (?, ?, ?, ?, ?)",
-      [messageData.sender, messageData.receiver, messageData.room, messageData.message, passwordToStore],
+      "INSERT INTO messages (sender, receiver, room, message) VALUES (?, ?, ?, ?)",
+      [user.username, receiver, user.room, msg],
       (err, result) => {
         if (err) return console.error("Insert error:", err);
         console.log("Message stored:", result.insertId);
@@ -112,16 +243,13 @@ io.on("connection", (socket) => {
     io.to(user.room).emit("message", formatMessage(user.username, msg));
   });
 
-  // Group Chat Message Handler
   socket.on("groupChatMessage", (data) => {
     const user = getCurrentUser(socket.id);
     if (!user) return;
 
-    const passwordToStore = user.password || "hysererrSgarHH@123TTS";
-
     db.query(
-      "INSERT INTO group_messages (username, room, message, password) VALUES (?, ?, ?, ?)",
-      [user.username, user.room, data.msg, passwordToStore],
+      "INSERT INTO group_messages (username, room, message) VALUES (?, ?, ?)",
+      [user.username, user.room, data.msg],
       (err, result) => {
         if (err) {
           console.error("Group message insert error:", err);
@@ -133,7 +261,6 @@ io.on("connection", (socket) => {
     );
   });
 
-  // Disconnect Handler
   socket.on("disconnect", () => {
     const user = userLeave(socket.id);
     if (user) {
@@ -150,4 +277,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`http://localhost:4000/`));

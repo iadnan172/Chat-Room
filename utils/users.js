@@ -1,13 +1,12 @@
 
 const users = []; // In-memory storage for connected users
 
-// Join user to chat (with password)
-function userJoin(id, username, room, password) {
+// Join user to chat (no password needed - JWT handles auth)
+function userJoin(id, username, room) {
   const user = { 
     id, 
     username, 
-    room, 
-    password // Password is now included in user object
+    room
   };
   users.push(user);
   return user;

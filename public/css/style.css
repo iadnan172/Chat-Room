@@ -39,12 +39,12 @@ a {
 
 }
 
-.logIn-btn:hover{
+.logIn-btn:hover {
 	border: 2px solid rgb(16, 16, 16);
 }
 
 
-.logIn-btn{
+.logIn-btn {
 	max-width: fit-content;
 	margin-inline: auto;
 	align-self: center;
@@ -54,6 +54,7 @@ a {
 	border-radius: 1rem;
 	transition: all 0.4s ease-in-out;
 }
+
 /* Chat Page */
 
 .chat-container {
@@ -105,17 +106,19 @@ a {
 	padding: 30px;
 	max-height: 500px;
 	overflow-y: scroll;
-	
+
 }
-.join-container{
+
+.join-container {
 	border-radius: 1rem;
 	box-shadow: 2px 2px 50px 2px gray;
 	transition: all 0.4s ease-in-out;
 }
 
-.join-container:hover{
+.join-container:hover {
 	box-shadow: 2px 2px 50px 2px rgb(23, 23, 23);
 }
+
 .chat-messages .message {
 	padding: 10px;
 	margin-bottom: 15px;
@@ -182,7 +185,8 @@ a {
 .join-main .form-control {
 	margin-bottom: 20px;
 }
-#msg{
+
+#msg {
 	width: 70%;
 }
 
@@ -193,7 +197,8 @@ a {
 	padding-bottom: .4rem;
 }
 
-.join-main input[type='text'] ,#room{
+.join-main input[type='text'],
+#room {
 	font-size: 12px;
 	padding: 5px;
 	height: 40px;
@@ -205,7 +210,8 @@ a {
 	transition: all 0.7s ease-in-out;
 }
 
-.join-main input[type='text']:hover ,#room:hover{
+.join-main input[type='text']:hover,
+#room:hover {
 	border: 2px solid black;
 }
 
@@ -220,17 +226,19 @@ a {
 	margin-top: 20px;
 	width: 100%;
 }
-.btn{
+
+.btn {
 	padding: .6rem 1.4rem;
 	border-radius: .8rem;
 	transition: all 0.4s ease-in;
 }
-.btn:hover{
+
+.btn:hover {
 	scale: 0.9;
 	color: #051549;
 }
 
-#password{
+#login-password {
 	font-size: 12px;
 	padding: 5px;
 	height: 40px;
@@ -241,7 +249,37 @@ a {
 
 }
 
-.form-control{
+#register-email {
+	font-size: 12px;
+	padding: 5px;
+	height: 40px;
+	width: 90%;
+	border-radius: .9rem;
+	outline: none;
+	transition: all 0.7s ease-in-out;
+}
+
+#register-password {
+	font-size: 12px;
+	padding: 5px;
+	height: 40px;
+	width: 90%;
+	border-radius: .9rem;
+	outline: none;
+	transition: all 0.7s ease-in-out;
+}
+
+#register-confirm-password {
+	font-size: 12px;
+	padding: 5px;
+	height: 40px;
+	width: 90%;
+	border-radius: .9rem;
+	outline: none;
+	transition: all 0.7s ease-in-out;
+}
+
+.form-control {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -267,4 +305,57 @@ footer {
 	.chat-sidebar {
 		display: none;
 	}
+}
+
+.auth-container {
+	max-width: 500px;
+	margin: 80px auto;
+	color: #fff;
+	border-radius: 1rem;
+	box-shadow: 2px 2px 50px 2px gray;
+}
+
+.tabs {
+	display: flex;
+	background: var(--dark-color-a);
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+
+.tab {
+	flex: 1;
+	padding: 20px;
+	text-align: center;
+	cursor: pointer;
+	border-bottom: 3px solid transparent;
+}
+
+.tab.active {
+	border-bottom-color: var(--light-color);
+}
+
+.form-container {
+	display: none;
+}
+
+.form-container.active {
+	display: block;
+}
+
+.error-message {
+	color: #ff6b6b;
+	background: rgba(255, 107, 107, 0.1);
+	padding: 10px;
+	border-radius: 5px;
+	margin-bottom: 15px;
+	display: none;
+}
+
+.success-message {
+	color: #51cf66;
+	background: rgba(81, 207, 102, 0.1);
+	padding: 10px;
+	border-radius: 5px;
+	margin-bottom: 15px;
+	display: none;
 }

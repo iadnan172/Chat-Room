@@ -1,58 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-		<link
-			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
-			integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk="
-			crossorigin="anonymous"
-		/>
-		<link rel="stylesheet" href="css/style.css" />
-		<title>Chat-App</title>
-	</head>
-	<body>
-		<div class="join-container">
-			<header class="join-header">
-				<h1><i class="fas fa-smile"></i>Chat-App</h1>
-			</header>
-			<main class="join-main">
-				<form action="chat.html">
-					<div class="form-control">
-						<label for="username">Username</label>
-						<input
-							type="text"
-							name="username"
-							id="username"
-							placeholder="Enter username..."
-							required
-						/>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" />
+	<link rel="stylesheet" href="css/style.css" />
+	<title>Chat-Cord - Login</title>
+</head>
+<body>
+	<div class="auth-container">
+		<div class="tabs">
+			<div class="tab active" onclick="showForm('login')">
+				<h2>Login</h2>
+			</div>
+			<div class="tab" onclick="showForm('register')">
+				<h2>Register</h2>
+			</div>
+		</div>
 
-						<label for="username">Password</label>
-						<input
-							type="Password"
-							name="Password"
-							id="password"
-							placeholder="Enter Password..."
-							required
-						/>
+		<!-- Login Form -->
+		<div id="login-form" class="form-container active">
+			<main class="join-main">
+				<div class="error-message" id="login-error"></div>
+				<form id="loginForm">
+					<div class="form-control">
+						<label for="login-username">Username</label>
+						<input type="text" id="login-username" placeholder="Enter Username..." required />
+
+						<label for="login-password">Password</label>
+						<input type="password" id="login-password" placeholder="Enter Password..." required />
 					</div>
 					<div class="form-control">
-						<label for="room">Room</label>
-						<select name="room" id="room">
+						<label for="login-room">Room</label>
+						<select id="login-room">
 							<option value="Private-Chat">Private-Chat</option>
 							<option value="Group-Chat">Group-Chat</option>
 						</select>
 					</div>
-					<button type="submit" class="btn logIn-btn">Join Chat</button>
+					<button type="submit" class="btn logIn-btn">Login</button>
 				</form>
 			</main>
 		</div>
-		
-		<footer>
-			<p>&copy; 2025 Chat-App. All rights reserved.</p>
-		</footer>
-	</body>
+
+		<!-- Register Form -->
+		<div id="register-form" class="form-container">
+			<main class="join-main">
+				<div class="error-message" id="register-error"></div>
+				<div class="success-message" id="register-success"></div>
+				<form id="registerForm">
+					<div class="form-control">
+						<label for="register-username">Username</label>
+						<input type="text" id="register-username" placeholder="Choose username..." required />
+
+						<label for="register-email">Email</label>
+						<input type="email" id="register-email" placeholder="Enter email..." required />
+
+						<label for="register-password">Password</label>
+						<input type="password" id="register-password" placeholder="Create password (min 6 characters)..." required />
+
+						<label for="register-confirm-password">Confirm Password</label>
+						<input type="password" id="register-confirm-password" placeholder="Confirm password..." required />
+					</div>
+					<button type="submit" class="btn logIn-btn">Register</button>
+				</form>
+			</main>
+		</div>
+	</div>
+
+	<footer>
+		<p>&copy; 2025 Chat-Cord. All rights reserved.</p>
+	</footer>
+
+	<script>
+		// Tab switching
+		function showForm(formType) {
+			document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+			document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+
+			if (formType === 'login') {
+				document.querySelector('.tab:first-child').classList.add('active');
+				document.getElementById('login-form').classList.add('active');
+			} else {
+				document.querySelector('.tab:last-child').classList.add('active');
+				document.getElementById('register-form').classList.add('active');
+			}
+		}
+
+		// Login Handler
+		document.getElementById('loginForm').addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			const username = document.getElementById('login-username').value;
+			const password = document.getElementById('login-password').value;
+			const room = document.getElementById('login-room').value;
+
+			try {
+				const response = await fetch('/api/login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ username, password })
+				});
+
+				const data = await response.json();
+
+				if (response.ok) {
+					// Store token in localStorage
+					localStorage.setItem('chatToken', data.token);
+					localStorage.setItem('username', data.username);
+					
+					// Redirect to chat
+					window.location.href = `chat.html?username=${data.username}&room=${room}`;
+				} else {
+					showError('login-error', data.error);
+				}
+			} catch (error) {
+				showError('login-error', 'Login failed. Please try again.');
+			}
+		});
+
+		// Register Handler
+		document.getElementById('registerForm').addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			const username = document.getElementById('register-username').value;
+			const email = document.getElementById('register-email').value;
+			const password = document.getElementById('register-password').value;
+			const confirmPassword = document.getElementById('register-confirm-password').value;
+
+			if (password !== confirmPassword) {
+				showError('register-error', 'Passwords do not match');
+				return;
+			}
+
+			try {
+				const response = await fetch('/api/register', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ username, email, password })
+				});
+
+				const data = await response.json();
+
+				if (response.ok) {
+					showSuccess('register-success', 'Registration successful! Please login.');
+					document.getElementById('registerForm').reset();
+					setTimeout(() => showForm('login'), 2000);
+				} else {
+					showError('register-error', data.error);
+				}
+			} catch (error) {
+				showError('register-error', 'Registration failed. Please try again.');
+			}
+		});
+
+		function showError(elementId, message) {
+			const errorEl = document.getElementById(elementId);
+			errorEl.textContent = message;
+			errorEl.style.display = 'block';
+			setTimeout(() => errorEl.style.display = 'none', 5000);
+		}
+
+		function showSuccess(elementId, message) {
+			const successEl = document.getElementById(elementId);
+			successEl.textContent = message;
+			successEl.style.display = 'block';
+			setTimeout(() => successEl.style.display = 'none', 5000);
+		}
+	</script>
+</body>
 </html>
