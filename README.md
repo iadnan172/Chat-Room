@@ -37,9 +37,9 @@ It supports **multiple chat rooms**, **private chats**, and **real-time communic
 
 ## 🛠️ Technologies Used
 
-| Frontend         | Backend          | Database     | Real-Time Server  |
-| ---------------- | ---------------- | ------------ | ----------------- |
-| HTML, CSS, JS    | Node.js, Express  | MySQL        | Socket.IO, Redis   |
+| Frontend         | Backend                | Database     | Real-Time Server  |
+| ---------------- | -----------------------| ------------ | ----------------- |
+| HTML, CSS, JS    | Node.js, Express, JWT  | MySQL        | Socket.IO, Redis   |
 
 ---
 
