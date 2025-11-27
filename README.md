@@ -9,29 +9,51 @@ It supports **multiple chat rooms**, **private chats**, and **real-time communic
 
 ## 📸 Screenshots
 
+### 🔒 Registration 
+![Private Chat](./{444DAE86-D3C5-4B30-8D80-F608CDBED000}.png)
+
 ### 🛢️ Login Page
-![Login Page](./{932F5931-C298-4ADB-AE76-EAB8AAD28139}.png)
+![Login Page](./{AB418B91-EDD1-4C87-AF9D-24309389721D}.png)
 
 ---
 
 ### 🔒 Private Chat
-![Private Chat](./private-chat.jpg)
+![Private Chat](./image.png)
 
 ---
 
 ### 👥 Group Chat
-![Group Chat](./group-chat.jpg)
+![Group Chat](./{27AEA0BA-3FCB-48BD-8414-E25DD507884E}.png)
 
 ---
 
-## ✨ Features
+## ✨ Key  Features
 
-- 🔵 Real-time messaging with **Socket.IO**
-- 🚱️ User authentication via **MySQL**
-- 🗣️ Multiple chat rooms support
-- 🔐 Private one-on-one chatting
-- 🚀 Redis integration for efficient broadcasting
-- 🟢 User online/offline status tracking
+## 🔐 Authentication & Security
+
+- **JWT**-based authentication
+- Password hashing using **bcrypt**
+- Role-based route protection
+- Secure session handling
+- Token verification middleware
+
+## 💬 Chat System
+
+- Real-time messaging using **Socket.IO**
+- Private chat (User → User chat with dropdown)
+- Group chat (Broadcast to all online users)
+- Message persistence using **MySQL**
+- Automatic chat history loading
+- Typing indicators (optional)
+- Read receipts (optional extension)
+
+## 👥 User Management
+
+- Online/offline status tracking (Redis-powered)
+- Live user list updates
+- Current user highlighting
+- Profile-based chat identification
+- Prevent duplicate logins (optional)
 
 ---
 
@@ -39,7 +61,7 @@ It supports **multiple chat rooms**, **private chats**, and **real-time communic
 
 | Frontend         | Backend                | Database     | Real-Time Server  |
 | ---------------- | -----------------------| ------------ | ----------------- |
-| HTML, CSS, JS    | Node.js, Express, JWT  | MySQL        | Socket.IO, Redis   |
+| HTML, CSS, JavaScript (Vanilla)    | Node.js, Express, JWT  | MySQL        | Socket.IO, Redis   |
 
 ---
 
@@ -119,21 +141,34 @@ REDIS_PORT=6379
 ## 📂 Folder Structure
 
 ```
-/chat-room
-│—— /public
-│   ├—— /css
-│   │   ├—— styles.css
-│   ├—— /js
-│   │   ├—— main.js
-│   ├—— index.html
-│   ├—— chat.html
-│—— /utils
-│   ├—— message.js
-│   ├—— users.js
-│—— server.js
-│—— package.json
-│—— .env
-│—— README.md
+chat-room/
+│
+├── backend/
+│   ├── server.js
+│   ├── routes/
+│   ├── controllers/
+│   ├── models/
+│   ├── middleware/
+│   └── config/
+│
+├── frontend/
+│   ├── index.html
+│   ├── chat.html
+│   ├── login.html
+│   ├── register.html
+│   ├── css/
+│   └── js/
+│
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│
+├── kubernetes/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   └── ingress.yaml
+│
+└── README.md
 ```
 
 ---
