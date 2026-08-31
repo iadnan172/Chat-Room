@@ -334,6 +334,54 @@ a {
 	font-size: 16px;
 }
 
+/* Attach (file share) button */
+.chat-form-container .attach-btn {
+	padding: 12px 16px;
+	flex: 0 0 auto;
+}
+
+.chat-form-container .attach-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* Upload progress line */
+.upload-status {
+	margin-top: 10px;
+	padding: 8px 12px;
+	background: rgba(255, 255, 255, 0.12);
+	color: var(--light-color);
+	border-radius: 6px;
+	font-size: 14px;
+}
+
+/* Shared media inside a message bubble */
+.chat-messages .message .media-link {
+	display: inline-block;
+}
+
+.chat-messages .message .media-img {
+	max-width: 260px;
+	max-height: 320px;
+	border-radius: 8px;
+	display: block;
+	cursor: pointer;
+}
+
+.chat-messages .message .media-video {
+	max-width: 320px;
+	max-height: 320px;
+	border-radius: 8px;
+	display: block;
+	background: #000;
+}
+
+.chat-messages .message .media-audio {
+	width: 260px;
+	max-width: 100%;
+	margin-top: 4px;
+}
+
 /* Join Page */
 .join-container {
 	max-width: 500px;
