@@ -288,6 +288,7 @@ const formatMessage = require("./utils/messages");
 const { createAdapter } = require("@socket.io/redis-adapter");
 const { createClient } = require("redis");
 const mysql = require("mysql2");
+const multer = require("multer");
 const { hashPassword, comparePassword, generateToken, verifyToken } = require("./utils/auth");
 require("dotenv").config();
 
@@ -462,6 +463,69 @@ app.post('/api/logout', (req, res) => {
   res.json({ success: true, message: 'Logged out successfully' });
 });
 
+// ==================== FILE UPLOAD (multer) ====================
+
+const UPLOAD_DIR = path.join(__dirname, "public", "uploads");
+
+// Store uploads on disk with a unique, extension-preserving name
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${unique}${ext}`);
+  },
+});
+
+// Only allow images, videos and audio
+const ALLOWED_PREFIXES = ["image/", "video/", "audio/"];
+function fileFilter(req, file, cb) {
+  const ok = ALLOWED_PREFIXES.some((p) => file.mimetype.startsWith(p));
+  cb(ok ? null : new Error("Only image, video and audio files are allowed"), ok);
+}
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB
+});
+
+// Map a mimetype to our simple message type
+function mediaType(mimetype) {
+  if (mimetype.startsWith("image/")) return "image";
+  if (mimetype.startsWith("video/")) return "video";
+  if (mimetype.startsWith("audio/")) return "audio";
+  return "file";
+}
+
+// JWT guard for HTTP routes (reuses verifyToken from utils/auth.js)
+function requireAuth(req, res, next) {
+  const token = req.headers.authorization?.split(" ")[1];
+  const decoded = token && verifyToken(token);
+  if (!decoded) return res.status(401).json({ error: "Unauthorized" });
+  req.user = decoded;
+  next();
+}
+
+// File upload endpoint. multer runs inside the handler so size/type
+// errors come back as clean JSON instead of throwing.
+app.post("/api/upload", requireAuth, (req, res) => {
+  upload.single("file")(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || "Upload failed" });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    res.json({
+      success: true,
+      fileUrl: `/uploads/${req.file.filename}`,
+      fileType: mediaType(req.file.mimetype),
+      fileName: req.file.originalname,
+    });
+  });
+});
+
 // ==================== SOCKET.IO WITH AUTH ====================
 
 io.use((socket, next) => {
@@ -516,23 +580,35 @@ io.on("connection", (socket) => {
         return;
       }
       results.forEach((msg) => {
-        socket.emit("message", formatMessage(msg.username, msg.message));
+        // private `messages` table uses `sender`; group table uses `username`
+        const sender = msg.username || msg.sender;
+        socket.emit(
+          "message",
+          formatMessage(sender, msg.message, {
+            type: msg.type,
+            fileUrl: msg.file_url,
+            fileName: msg.file_name,
+          })
+        );
       });
     });
   });
   
-  socket.on("chatMessage", ({ msg, receiver }) => {
+  socket.on("chatMessage", ({ msg, receiver, type, fileUrl, fileName }) => {
     const user = getCurrentUser(socket.id);
     if (!user) {
       console.log("User not found for socket:", socket.id);
       return;
     }
 
-    console.log(`Private message from ${user.username} to ${receiver}: ${msg}`);
+    const meta = { type: type || "text", fileUrl: fileUrl || null, fileName: fileName || null };
+    const text = msg || "";
+
+    console.log(`Private message from ${user.username} to ${receiver} (${meta.type})`);
 
     db.query(
-      "INSERT INTO messages (sender, receiver, room, message) VALUES (?, ?, ?, ?)",
-      [user.username, receiver, user.room, msg],
+      "INSERT INTO messages (sender, receiver, room, message, type, file_url, file_name) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [user.username, receiver, user.room, text, meta.type, meta.fileUrl, meta.fileName],
       (err, result) => {
         if (err) {
           console.error("Insert error:", err);
@@ -543,30 +619,33 @@ io.on("connection", (socket) => {
     );
 
     // Send to everyone in the room (they can see all messages)
-    io.to(user.room).emit("message", formatMessage(user.username, msg));
+    io.to(user.room).emit("message", formatMessage(user.username, text, meta));
   });
 
-  socket.on("groupChatMessage", ({ msg }) => {
+  socket.on("groupChatMessage", ({ msg, type, fileUrl, fileName }) => {
     const user = getCurrentUser(socket.id);
     if (!user) {
       console.log("User not found for socket:", socket.id);
       return;
     }
 
-    console.log(`Group message from ${user.username}: ${msg}`);
+    const meta = { type: type || "text", fileUrl: fileUrl || null, fileName: fileName || null };
+    const text = msg || "";
+
+    console.log(`Group message from ${user.username} (${meta.type})`);
 
     db.query(
-      "INSERT INTO group_messages (username, room, message) VALUES (?, ?, ?)",
-      [user.username, user.room, msg],
+      "INSERT INTO group_messages (username, room, message, type, file_url, file_name) VALUES (?, ?, ?, ?, ?, ?)",
+      [user.username, user.room, text, meta.type, meta.fileUrl, meta.fileName],
       (err, result) => {
         if (err) {
           console.error("Group message insert error:", err);
           return;
         }
         console.log("Group message stored:", result.insertId);
-        
+
         // Send to all users in the room
-        io.to(user.room).emit("message", formatMessage(user.username, msg));
+        io.to(user.room).emit("message", formatMessage(user.username, text, meta));
       }
     );
   });
